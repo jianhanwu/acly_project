@@ -22,8 +22,8 @@ coldata_fc = data.frame(condition = c(rep('WT', 9), rep('KO', 12)),
 
 # DESeq2
 deseq2_obj = DESeqDataSetFromMatrix(countData = dat,
-                                     colData = coldata_fc,
-                                     design = ~ condition*time)
+                                    colData = coldata_fc,
+                                    design = ~ condition + time + condition:time)
 
 # Set reference level
 deseq2_obj$condition = relevel(deseq2_obj$condition, ref = "WT")
@@ -37,7 +37,7 @@ res_interaction = results(deseq2_obj, name = "conditionKO.timeLate")
 
 # Early time point result
 res_early = results(deseq2_obj, 
-                    name = "condition_KO_vs_WT"
+                    name = "condition_KO_vs_WT", test = 'Wald'
                     )
 
 # Late time point result
@@ -45,7 +45,7 @@ res_late = results(deseq2_obj,
                    contrast = list(
                      c("condition_KO_vs_WT", 
                        "conditionKO.timeLate")
-                     )
+                     ), test = 'Wald'
                    )
 
 # Normalized counts
