@@ -1,4 +1,5 @@
 # This script prepares TPM normalized expression matrix for use with TIMER2.0 immune deconvolution
+# Output from this script corresponds to Figure 4D
 library(dplyr)
 library(org.Mm.eg.db)
 library(mMCPcounter)
@@ -46,8 +47,7 @@ symbol = data.frame(
   rownames_to_column('ENTREZID')
 aclyko_tpm = inner_join(symbol, aclyko_tpm, by = 'ENTREZID')
 
-# NOTE: Deconvolution analyses were performed using TIMER2.0 hosted at http://timer.cistrome.org/ at the time of analysis. However, the server seems to be dysfunct at the time of publication. 
-# Nevertheless, results can be reproduced by using the immunedeconv package as shown below. 
+# NOTE: Deconvolution analyses were performed using TIMER2.0 hosted at http://timer.cistrome.org/ at the time of analysis. However, the server may no longer be accessible at the time of publication. Nevertheless, results can be reproduced by using the immunedeconv package as shown below. 
 # Clean matrix for deconvolution
 exp_dat = aclyko_tpm[, -which(colnames(aclyko_tpm) %in% c('ENTREZID', 'gene_symbol'))]
 rownames(exp_dat) = aclyko_tpm[, 'gene_symbol']
