@@ -1,4 +1,5 @@
 # This script performs differential gene expression analysis using mouse-derived RNA-seq featureCounts data and outputs time-modified result from interaction test and timepoint specific results.
+# Output from this script corresponds to Figure 4A, Extended Figure 7C, D, E 
 library(dplyr)
 library(DESeq2)
 
@@ -20,16 +21,19 @@ coldata_fc = data.frame(condition = c(rep('WT', 9), rep('KO', 12)),
                         time = c(rep("Early",5), rep("Late",4), rep("Early",7), rep("Late",5)) 
                        ) # modify according to the sample ordering of your counts matrix
 
-# DESeq2
+# Overall differential gene expression adjusted for time
+deseq2_obj = DESeqDataSetFromMatrix(countData = dat,
+                                    colData = coldata_fc,
+                                    design = ~ condition + time)
+deseq2_obj = DESeq(deseq2_obj)
+res = results(deseq2_obj, test = 'Wald')
+
+# Timepoint specific result and time interaction model
 deseq2_obj = DESeqDataSetFromMatrix(countData = dat,
                                     colData = coldata_fc,
                                     design = ~ condition + time + condition:time)
-
-# Set reference level
 deseq2_obj$condition = relevel(deseq2_obj$condition, ref = "WT")
 deseq2_obj$time = relevel(deseq2_obj$time, ref = "Early")
-
-# Run DESeq2
 deseq2_obj = DESeq(deseq2_obj)
 
 # Interaction result
@@ -47,8 +51,3 @@ res_late = results(deseq2_obj,
                        "conditionKO.timeLate")
                      ), test = 'Wald'
                    )
-
-# Normalized counts
-vsd = vst(deseq2_obj)
-vsd = assay(vsd)
-norm = counts(deseq2_obj, normalize = TRUE)
