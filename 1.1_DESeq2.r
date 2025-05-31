@@ -6,13 +6,14 @@ library(DESeq2)
 file_path = list.files("/path/to/featureCounts") # modify to folder containing the featureCounts data
 
 # Read
-dat = sapply(file_path, function(x) {
+dat = lapply(file_path, function(x) {
   
   fc = read.delim(x, header = T)
   rownames(fc) = fc[, 1]
-  fc = fc[, -1]
+  fc = fc[, 2, drop = FALSE]
+  return(fc)
   
-})
+}) %>% do.call('cbind', .)
 
 # Specify conditions
 coldata_fc = data.frame(condition = c(rep('WT', 9), rep('KO', 12)), 
