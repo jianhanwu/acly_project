@@ -12,7 +12,7 @@ dat = sapply(file_path, function(x) {
   rownames(fc) = fc[, 1]
   fc = fc[, -1]
   
-}) %>% do.call('cbind', .)
+})
 
 # Specify conditions
 coldata_fc = data.frame(condition = c(rep('WT', 9), rep('KO', 12)), 
