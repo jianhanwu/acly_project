@@ -52,3 +52,10 @@ res_late = results(deseq2_obj,
                        "conditionKO.timeLate")
                      ), test = 'Wald'
                    )
+
+# Save result
+res_compile = list(overall = res,
+                   early = res_early,
+                   late = res_late,
+                   interaction = res_interaction)
+saveRDS(res_compile, './result/res_compile.RDS')
