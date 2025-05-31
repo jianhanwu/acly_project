@@ -54,3 +54,10 @@ rownames(exp_dat) = aclyko_tpm[, 'gene_symbol']
 
 # mMCP-counter
 mmcp = deconvolute_mouse(exp_dat, "mmcp_counter")
+
+# Correlation with ACLY expression
+fc_tpm_mcp = data.frame(ACLY = as.numeric(subset(aclyko_tpm, gene_symbol == 'Acly')[-c(1,2)]),  
+                        B_cell = as.numeric(mmcp[4, -1]), 
+                        condition = c(rep('KO', 12), rep('WT', 9)) #modify based on sample ordering
+                        )
+cor.test(fc_tpm_mcp$ACLY, fc_tpm_mcp$B_cell)
