@@ -50,7 +50,7 @@ res_late = lfcShrink(deseq2_obj,
                      contrast = list(
                        c("condition_KO_vs_WT", 
                          "conditionKO.timeLate")
-                     )
+                     ),
                      res = res_late, type = "normal")
 
 # Normalized counts
