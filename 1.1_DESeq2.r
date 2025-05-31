@@ -27,7 +27,7 @@ deseq2_obj = DESeqDataSetFromMatrix(countData = dat,
 
 # Set reference level
 deseq2_obj$condition = relevel(deseq2_obj$condition, ref = "WT")
-deseq2_obj$Time = relevel(deseq2_obj$Time, ref = "Early")
+deseq2_obj$time = relevel(deseq2_obj$time, ref = "Early")
 
 # Run DESeq2
 deseq2_obj = DESeq(deseq2_obj, test="LRT", reduced = ~ condition + time)
