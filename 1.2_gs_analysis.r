@@ -43,7 +43,6 @@ go_res = lapply(1:3, function(n) {
 # Gene set enrichment analysis================================================
 destfile = "m5.all.v2022.1.Mm.entrez.gmt"
 c5 = read.gmt(destfile)
-c5 = c5[grep('GOBP', c5$term), ]
 gsea_res = lapply(1:3, function(n) {
   
   res = res_compile[[n]]
@@ -77,7 +76,8 @@ go_id$V2 = gsub(" ", "", go_id$V2) %>%
 
 # Munge
 c5_res = gsea_res[[1]][, c(5,7)] %>%
-  rownames_to_column('ID')
+  rownames_to_column('ID') %>%
+  filter(grepl('GOBP', ID))
 c5_id = lapply(c('up', 'down'), function(i) {
   
   if (i == 'up') c5_id = subset(c5_res, NES > 0) 
