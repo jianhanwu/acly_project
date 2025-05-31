@@ -51,3 +51,8 @@ res_late = lfcShrink(deseq2_obj,
                          "conditionKO.timeLate")
                      )
                      res = res_late, type = "normal")
+
+# Normalized counts
+vsd = vst(deseq2_obj)
+vsd = assay(vsd)
+norm = counts(deseq2_obj, normalize = TRUE)
