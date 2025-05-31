@@ -24,7 +24,8 @@ coldata_fc = data.frame(condition = c(rep('WT', 9), rep('KO', 12)),
 # Overall differential gene expression adjusted for time
 deseq2_obj = DESeqDataSetFromMatrix(countData = dat,
                                     colData = coldata_fc,
-                                    design = ~ condition + time)
+                                    design = ~ time + condition)
+deseq2_obj$condition = relevel(deseq2_obj$condition, ref = "WT")
 deseq2_obj = DESeq(deseq2_obj)
 res = results(deseq2_obj, test = 'Wald')
 
