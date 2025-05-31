@@ -30,28 +30,23 @@ deseq2_obj$condition = relevel(deseq2_obj$condition, ref = "WT")
 deseq2_obj$time = relevel(deseq2_obj$time, ref = "Early")
 
 # Run DESeq2
-deseq2_obj = DESeq(deseq2_obj, test="LRT", reduced = ~ condition + time)
+deseq2_obj = DESeq(deseq2_obj)
 
 # Interaction result
 res_interaction = results(deseq2_obj, name = "conditionKO.timeLate")
 
 # Early time point result
-res_early = results(deseq2_obj, name="condition_KO_vs_WT")
-res_early = lfcShrink(deseq2_obj, contrast="condition_KO_vs_WT", res = res_early, type = "normal")
+res_early = results(deseq2_obj, 
+                    name = "condition_KO_vs_WT"
+                    )
 
 # Late time point result
 res_late = results(deseq2_obj, 
                    contrast = list(
                      c("condition_KO_vs_WT", 
-                     "conditionKO.timeLate")
+                       "conditionKO.timeLate")
+                     )
                    )
-                  )
-res_late = lfcShrink(deseq2_obj, 
-                     contrast = list(
-                       c("condition_KO_vs_WT", 
-                         "conditionKO.timeLate")
-                     ),
-                     res = res_late, type = "normal")
 
 # Normalized counts
 vsd = vst(deseq2_obj)
