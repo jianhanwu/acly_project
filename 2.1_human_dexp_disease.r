@@ -34,7 +34,14 @@ colnames(design_GSE164760) = c("Healthy","Cirrhosis","MASH","NTA", "HCC")
 
 # Limma
 lmfit <- lmFit(GSE164760.exp, design_GSE164760)
-contrast_GSE164760 = makeContrasts(HCC-MASH, HCC-NTA, NTA-MASH, HCC-Healthy, HCC-Cirrhosis, MASH-Healthy, NTA-Healthy, Cirrhosis-Healthy,
+contrast_GSE164760 = makeContrasts(HCC-MASH, 
+                                   HCC-NTA, 
+                                   NTA-MASH, 
+                                   HCC-Healthy, 
+                                   HCC-Cirrhosis, 
+                                   MASH-Healthy, 
+                                   NTA-Healthy, 
+                                   Cirrhosis-Healthy,
                                    levels = design_GSE164760)
 lmfit.cont <- contrasts.fit(lmfit, contrast_GSE164760)
 lmfit.cont.ebayes <- eBayes(lmfit.cont)
@@ -42,17 +49,13 @@ lmfit.cont.ebayes <- eBayes(lmfit.cont)
 # Pairwise contrasts
 # HCC vs. MASH
 res_lmfit.cont_hccmash = topTable(lmfit.cont.ebayes, coef=1, n=Inf) %>% 
-  rownames_to_column("ENTREZID") %>%
-  mutate(rank = ifelse(logFC > 0, -log(P.Value), -log(P.Value)*-1))
+  rownames_to_column("ENTREZID")
 # HCC vs. NTA
 res_lmfit.cont_hccnta = topTable(lmfit.cont.ebayes, coef=2, n=Inf) %>% 
-  rownames_to_column("ENTREZID") %>%
-  mutate(rank = ifelse(logFC > 0, -log(P.Value), -log(P.Value)*-1))
+  rownames_to_column("ENTREZID")
 # HCC vs. Healthy
 res_lmfit.cont_hcchealthy = topTable(lmfit.cont.ebayes, coef=4, n=Inf) %>% 
-  rownames_to_column("ENTREZID") %>%
-  mutate(rank = ifelse(logFC > 0, -log(P.Value), -log(P.Value)*-1))
+  rownames_to_column("ENTREZID") 
 # HCC vs. Cirrhosis
 res_lmfit.cont_hcccirrhosis = topTable(lmfit.cont.ebayes, coef=5, n=Inf) %>% 
-  rownames_to_column("ENTREZID") %>%
-  mutate(rank = ifelse(logFC > 0, -log(P.Value), -log(P.Value)*-1))
+  rownames_to_column("ENTREZID")
