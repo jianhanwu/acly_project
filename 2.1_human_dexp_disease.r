@@ -32,7 +32,7 @@ tissue = factor(c(rep(1,6), rep(2,8), rep(3,74), rep(4,29), rep(5,53)),
 design_GSE164760 = model.matrix(~0 + tissue)
 colnames(design_GSE164760) = c("Healthy","Cirrhosis","MASH","NTA", "HCC")
 
-# Limma
+# Fit model
 lmfit <- lmFit(GSE164760.exp, design_GSE164760)
 contrast_GSE164760 = makeContrasts(HCC-MASH, 
                                    HCC-NTA, 
