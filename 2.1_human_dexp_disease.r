@@ -10,6 +10,7 @@ BiocManager::install('metapredict', site_repository = 'https://hugheylab.github.
 library(metapredict)
 installCustomCdfPackages("hgu219hsentrezgcdf", ver = 25)
 library(hgu219hsentrezgcdf)
+library(ggVennDiagram)
 
 # Load probe ID
 id = read.delim('GSE164760_probe_id.txt', header = F)
@@ -59,3 +60,28 @@ res_lmfit.cont_hcchealthy = topTable(lmfit.cont.ebayes, coef=4, n=Inf) %>%
 # HCC vs. Cirrhosis
 res_lmfit.cont_hcccirrhosis = topTable(lmfit.cont.ebayes, coef=5, n=Inf) %>% 
   rownames_to_column("ENTREZID")
+
+# Find genes differentially expressed across all pairwise MASH-HCC comparisons
+list_limma = list('HCC-NASH_UP' = subset(res_lmfit.cont_hccmash, adj.P.Val <= 0.05 & logFC >0)[,1],
+                  'HCC-NTA_UP' = subset(res_lmfit.cont_hccnta, adj.P.Val <= 0.05 & logFC >0)[,1],
+                  'HCC-Healthy_UP' = subset(res_lmfit.cont_hcchealthy, adj.P.Val <= 0.05 & logFC >0)[,1],
+                  'HCC-Cirrhosis_UP' = subset(res_lmfit.cont_hcccirrhosis, adj.P.Val <= 0.05 & logFC >0)[,1],
+                   "HCC-NASH_DN" = subset(res_lmfit.cont_hccmash, adj.P.Val <= 0.05 & logFC <0)[,1],
+                  'HCC-NTA_DN' =subset(res_lmfit.cont_hccnta, adj.P.Val <= 0.05 & logFC <0)[,1],
+                   'HCC-Healthy_DN' = subset(res_lmfit.cont_hcchealthy, adj.P.Val <= 0.05 & logFC <0)[,1],
+                   'HCC-Cirrhosis_DN'=subset(res_lmfit.cont_hcccirrhosis, adj.P.Val <= 0.05 & logFC <0)[,1])
+common_up = process_region_data(Venn(list_limma[c(1:4)]))
+common_up_genes = common_up$item[[15]]
+common_dn = process_region_data(Venn(list_limma[-c(1:4)]))
+common_dn_genes = common_dn$item[[15]]
+
+# Extract ACLY, ACACA, ACACB, ACSS2, FASN differential expression result
+entrezid_symbol = c(ACLY = 47, ACACA = 31, ACACB = 32, ACSS2 = 55902, FASN = 2194)
+intersect(common_up_genes, entrezid_symbol)
+intersect(common_dn_genes, entrezid_symbol)
+select_dexp_res = lmfit.cont.ebayes$p.value %>%
+  as.data.frame() %>%
+  rownames_to_column("ENTREZID") %>%
+  filter(ENTREZID %in% as.numeric(entrezid_symbol)) 
+
+
