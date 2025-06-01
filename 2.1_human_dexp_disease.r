@@ -62,14 +62,23 @@ res_lmfit.cont_hcccirrhosis = topTable(lmfit.cont.ebayes, coef=5, n=Inf) %>%
   rownames_to_column("ENTREZID")
 
 # Find genes differentially expressed across all pairwise MASH-HCC comparisons
-list_limma = list('HCC-NASH_UP' = subset(res_lmfit.cont_hccmash, adj.P.Val <= 0.05 & logFC >0)[,1],
-                  'HCC-NTA_UP' = subset(res_lmfit.cont_hccnta, adj.P.Val <= 0.05 & logFC >0)[,1],
-                  'HCC-Healthy_UP' = subset(res_lmfit.cont_hcchealthy, adj.P.Val <= 0.05 & logFC >0)[,1],
-                  'HCC-Cirrhosis_UP' = subset(res_lmfit.cont_hcccirrhosis, adj.P.Val <= 0.05 & logFC >0)[,1],
-                   "HCC-NASH_DN" = subset(res_lmfit.cont_hccmash, adj.P.Val <= 0.05 & logFC <0)[,1],
-                  'HCC-NTA_DN' =subset(res_lmfit.cont_hccnta, adj.P.Val <= 0.05 & logFC <0)[,1],
-                   'HCC-Healthy_DN' = subset(res_lmfit.cont_hcchealthy, adj.P.Val <= 0.05 & logFC <0)[,1],
-                   'HCC-Cirrhosis_DN'=subset(res_lmfit.cont_hcccirrhosis, adj.P.Val <= 0.05 & logFC <0)[,1])
+get_sig_genes <- function(data, direction = "UP") {
+  if (direction == "UP") {
+    subset(data, adj.P.Val <= 0.05 & logFC > 0)[, 1]
+  } else {
+    subset(data, adj.P.Val <= 0.05 & logFC < 0)[, 1]
+  }
+}
+list_limma <- list(
+  'HCC-NASH_UP'       = get_sig_genes(res_lmfit.cont_hccmash, "UP"),
+  'HCC-NTA_UP'        = get_sig_genes(res_lmfit.cont_hccnta, "UP"),
+  'HCC-Healthy_UP'    = get_sig_genes(res_lmfit.cont_hcchealthy, "UP"),
+  'HCC-Cirrhosis_UP'  = get_sig_genes(res_lmfit.cont_hcccirrhosis, "UP"),
+  'HCC-NASH_DN'       = get_sig_genes(res_lmfit.cont_hccmash, "DN"),
+  'HCC-NTA_DN'        = get_sig_genes(res_lmfit.cont_hccnta, "DN"),
+  'HCC-Healthy_DN'    = get_sig_genes(res_lmfit.cont_hcchealthy, "DN"),
+  'HCC-Cirrhosis_DN'  = get_sig_genes(res_lmfit.cont_hcccirrhosis, "DN")
+)
 common_up = process_region_data(Venn(list_limma[c(1:4)]))
 common_up_genes = common_up$item[[15]]
 common_dn = process_region_data(Venn(list_limma[-c(1:4)]))
