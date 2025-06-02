@@ -19,7 +19,7 @@ dir_path = '/path/to/GSE164760/'
 # Read
 GSE164760 = ReadAffy(celfile.path = dir_path, cdfname="hgu219hsentrezg")
 
-# Create epression file
+# Create expression file
 norm.GSE164760 = rma(GSE164760)
 GSE164760.exp = as.data.frame(exprs(norm.GSE164760))
 rownames(GSE164760.exp) = gsub('_at', '', rownames(GSE164760.exp))
@@ -39,6 +39,14 @@ gs_list_gepliver = lapply(gs_list_gepliver, function(i) i[[1]]) %>% setNames(gs_
 gene_id = data.frame(symbol = c('ACLY', gs_list_gepliver[['B cell']]),
                      entrez = id[match(c('ACLY', gs_list_gepliver[['B cell']]), id$Symbol), ]$ENTREZID)
 cor_cell = t(GSE164760.norm[which(rownames(GSE164760.norm) %in% gene_id$symbol), ]) %>% cor()
+
+# Extract ACLY expression from MASH-HCC samples================================
+mash_hcc_sample_index = 118:170
+acly_id = "47"
+acly_exp = GSE164760.exp[acly_id, mash_hcc_sample_index] %>% 
+  t() %>% 
+  as.data.frame() %>%
+  setNames('ACLY')
 
 # Deconvolution=================================================================                         
 ## Proceed to http://timer.comp-genomics.org/ for immune cell deconvolution using GSE164760_norm.txt.gz with settings species = Human, cancer type = LIHC============
@@ -70,15 +78,6 @@ xcell_b = subset(xcell, cell_type == 'B cell plasma')[-1] %>% as.numeric()
 quantiseq_b = subset(quantiseq, cell_type == 'B cell')[-1] %>% as.numeric()
 
 # Correlate B cell estimate with ACLY expression===============================================
-# Extract ACLY expression from MASH-HCC samples
-mash_hcc_sample_index = 118:170
-acly_id = "47"
-acly_exp = GSE164760.exp[acly_id, mash_hcc_sample_index] %>% 
-  t() %>% 
-  as.data.frame() %>%
-  setNames('ACLY')
-
-# Correlate
 cor.test(epic_b, scale(acly_exp$ACLY))
 cor.test(xcell_b, scale(acly_exp$ACLY))
 cor.test(quantiseq_b, scale(acly_exp$ACLY))
