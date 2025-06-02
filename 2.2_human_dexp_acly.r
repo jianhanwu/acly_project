@@ -37,7 +37,27 @@ acly_exp = GSE164760.exp[acly_id, mash_hcc_sample_index] %>%
   arrange(Sample) %>% 
   column_to_rownames("Sample")
 
-# Design matrix (nonlinear model)
+# Linear model==================================================
+# Design matrix
+design_acly_linear = model.matrix(~acly_exp$ACLY)
+
+# Fit model
+fit_acly_linear <- lmFit(GSE164760.exp[, mash_hcc_sample_index], design_acly_linear)
+fit_acly_linear = eBayes(fit_acly_linear)
+
+# Extract genes significantly associated with ACLY expression
+result_acly_linear = topTable(fit_acly_linear, coef = 2, n=Inf, sort.by="none") %>%
+  rownames_to_column("ENTREZID") %>%
+  subset(adj.P.Val <= 0.05)
+
+# PCA
+acly_deg_pc = GSE164760.exp[result_acly_linear$ENTREZID, mash_hcc_sample_index] %>%
+  t() %>% 
+  prcomp(scale = TRUE, center = TRUE)
+summary(acly_deg_pc) 
+
+# Nonlinear model====================================================
+# Design matrix
 acly_spline = ns(acly_exp$ACLY, df= 5)
 design_acly = model.matrix(~acly_spline)
 
@@ -54,12 +74,13 @@ result_acly_spline = topTable(fit_acly_spline, coef = 2:ncol(design_acly), n = I
 acly_deg_pc = GSE164760.exp[result_acly_spline$ENTREZID, mash_hcc_sample_index] %>%
   t() %>% 
   prcomp(scale = TRUE, center = TRUE)
-summary(acly_deg_pc)
+summary(acly_deg_pc) # nonlinear model more efficiently captures variance (initial PCs explain more variance than equivalent PCs from linear model)
 acly_deg_pc = acly_deg_pc$x %>% 
   cbind(Tertile = acly_exp$Tertile) %>% 
   as.data.frame() %>% 
   type.convert(as.is = TRUE)
 
+# Factor model=============================================
 # Design matrix (Low vs. High)
 acly_bin = factor(c(rep(0,18), rep(1,18)), labels=c("Low","High"))
 design_acly_bin = model.matrix(~acly_bin)
@@ -81,3 +102,14 @@ lmfit_aclybin.ebayes <- eBayes(lmfit_aclybin)
 res_lmfit_aclybin.cont = decideTests(lmfit_aclybin.ebayes, p.value = 0.05)
 res_lmfit_aclybin = topTable(lmfit_aclybin.ebayes, coef=2, n=Inf) %>%
   rownames_to_column("ENTREZID")
+
+# CXCL13 expression
+cxcl13_exp = GSE164760.exp['10563', bin_index] %>%
+  t() %>% as.data.frame() %>% 
+  setNames('CXCL13') %>%
+  cbind(Bin = bin_sample$Tertile)
+lmfit_aclybin.cont_p = lmfit_aclybin.ebayes$p.value %>%
+  as.data.frame() %>%
+  rownames_to_column("ENTREZID") %>%
+  filter(ENTREZID == '10563') %>%
+  select(contains('acly_bin'))
