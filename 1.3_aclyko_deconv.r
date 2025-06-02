@@ -1,4 +1,4 @@
-# This script prepares TPM normalized expression matrix for use with TIMER2.0 immune deconvolution
+# This script prepares TPM normalized expression matrix for immune cell deconvolution
 # Output from this script corresponds to Figure 4D
 library(dplyr)
 library(org.Mm.eg.db)
