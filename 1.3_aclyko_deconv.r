@@ -47,8 +47,9 @@ symbol = data.frame(
   rownames_to_column('ENTREZID')
 aclyko_tpm = inner_join(symbol, aclyko_tpm, by = 'ENTREZID')
 
-# NOTE: Deconvolution analyses were performed using TIMER2.0 hosted at http://timer.cistrome.org/ at the time of analysis. However, the server may no longer be accessible at the time of publication. Nevertheless, results can be reproduced by using the immunedeconv package as shown below. 
-# Clean matrix for deconvolution
+# Proceed to http://timer.comp-genomics.org/ for immune cell deconvolution
+# Alternatively use immunedeconv package
+# Clean matrix for immunedeconv input
 exp_dat = aclyko_tpm[, -which(colnames(aclyko_tpm) %in% c('ENTREZID', 'gene_symbol'))]
 rownames(exp_dat) = aclyko_tpm[, 'gene_symbol']
 
