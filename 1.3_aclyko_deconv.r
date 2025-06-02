@@ -47,18 +47,39 @@ symbol = data.frame(
   rownames_to_column('ENTREZID')
 aclyko_tpm = inner_join(symbol, aclyko_tpm, by = 'ENTREZID')
 
-# Proceed to http://timer.comp-genomics.org/ for immune cell deconvolution
-# Alternatively use immunedeconv package
-# Clean matrix for immunedeconv input
+# Clean matrix for deconvolution input
 exp_dat = aclyko_tpm[, -which(colnames(aclyko_tpm) %in% c('ENTREZID', 'gene_symbol'))]
 rownames(exp_dat) = aclyko_tpm[, 'gene_symbol']
+write.table(exp_dat, './aclyko_tpm.txt', col.names = T, row.names = T, quote = F, sep = '\t')
 
+# Deconvolution=============================================================================
+# Proceed to http://timer.comp-genomics.org/ for immune cell deconvolution with settings species = Mouse, cancer type = LIHC===========
+estimation_matrix = read_csv("aclyko_estimation_matrix.csv")
+
+# Extract B cell inference
+mmcp_b = subset(estimation_matrix, cell_type == 'B cell_MMCPCOUNTER')[-1] %>% as.numeric()
+timer_b = subset(estimation_matrix, cell_type == 'B cell_TIMER')[-1] %>% as.numeric()
+cibersort_b = subset(estimation_matrix, cell_type == 'B cell plasma_CIBERSORT-ABS')[-1] %>% as.numeric()
+quantiseq_b = subset(estimation_matrix, cell_type == 'B cell_QUANTISEQ')[-1] %>% as.numeric()
+
+# Alternatively use immunedeconv package============================================
 # mMCP-counter
 mmcp = deconvolute_mouse(exp_dat, "mmcp_counter")
+mmcp_b = as.numeric(mmcp[4, -1])
 
-# Correlation with ACLY expression
-fc_tpm_mcp = data.frame(ACLY = as.numeric(subset(aclyko_tpm, gene_symbol == 'Acly')[-c(1,2)]),  
-                        B_cell = as.numeric(mmcp[4, -1]), 
-                        condition = c(rep('KO', 12), rep('WT', 9)) #modify based on sample ordering
-                        )
-cor.test(fc_tpm_mcp$ACLY, fc_tpm_mcp$B_cell)
+# TIMER
+exp_dat_h_ortho <- immunedeconv::mouse_genes_to_human(exp_dat)
+timer = deconvolute(exp_dat_h_ortho, 'timer')
+
+# CIBERSORT-ABS
+cibersort = deconvolute(exp_dat_h_ortho, 'cibersort_abs')
+
+# QUANTISEQ
+quantiseq = deconvolute(exp_dat_h_ortho, 'quantiseq')
+
+# Correlation with ACLY expression====================================================
+acly_exp = as.numeric(subset(aclyko_tpm, gene_symbol == 'Acly')[-c(1,2)])
+cor.test(mmcp_b, acly_exp)
+cor.test(timer_b, acly_exp)
+cor.test(cibersort_b, acly_exp)
+cor.test(quantiseq_b, acly_exp)
