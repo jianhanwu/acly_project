@@ -1,10 +1,9 @@
 # This script prepares TPM normalized expression matrix for immune cell deconvolution
 # Output from this script corresponds to Figure 4D
 library(dplyr)
-library(org.Mm.eg.db)
-library(mMCPcounter)
 library(magrittr)
 library(tidyverse)
+library(immunedeconv)
 
 # Get file path for counts data
 file_path = list.files("/path/to/featureCounts") # modify to folder containing the featureCounts data
@@ -34,20 +33,11 @@ aclyko_tpm = do.call("cbind", lapply(1:21, function(x) {
 
 # Convert entrez ID to gene symbol
 aclyko_tpm = rownames_to_column(aclyko_tpm, 'ENTREZID')
-symbol = data.frame(
-  "gene_symbol" = mapIds(
-    org.Mm.eg.db,
-    keys = as.character(fc_length$Geneid),
-    keytype = "ENTREZID",
-    column = "SYMBOL",
-    multiVals = "first"
-  )
-) %>%
-  filter(!is.na(gene_symbol)) %>%
-  rownames_to_column('ENTREZID')
-aclyko_tpm = inner_join(symbol, aclyko_tpm, by = 'ENTREZID')
+symbol = read.delim('mouse_entrez_symbol.txt', header = T)
+aclyko_tpm = aclyko_tpm[match(symbol$ENTREZID, aclyko_tpm$ENTREZID), ]
+aclyko_tpm$gene_symbol = symbol$Symbol
 
-# Clean matrix for deconvolution input
+# Clean matrix for deconvolution
 exp_dat = aclyko_tpm[, -which(colnames(aclyko_tpm) %in% c('ENTREZID', 'gene_symbol'))]
 rownames(exp_dat) = aclyko_tpm[, 'gene_symbol']
 write.table(exp_dat, './aclyko_tpm.txt', col.names = T, row.names = T, quote = F, sep = '\t')
