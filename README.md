@@ -3,4 +3,4 @@ This repository is intended for reproducing transcriptomic analyses contained in
 
 Analysis of mouse-derived RNA-Seq data intakes featureCounts files available from **GSE296668**. Analysis of human-derived microarray data intakes CEL files avaialble from **GSE164760**. Analysis of human-derived snRNA-seq data intakes seurat object from **GSE189175**.
 
-Additional requisite files can be found in Misc folder.
+Additional requisite files can be found in the **Misc** folder.
