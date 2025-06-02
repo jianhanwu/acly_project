@@ -19,7 +19,7 @@ dat = lapply(file_path, function(x) {
 }) %>% do.call('cbind', .)
 
 # Read gene length data 
-fc_length = readRDS('path/to/feature_lengths/fc_length.RDS')
+fc_length = read.table('fc_length.txt', header = T)
 
 # Convert to TPM
 aclyko_tpm = do.call("cbind", lapply(1:21, function(x) {
