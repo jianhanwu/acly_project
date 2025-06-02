@@ -10,9 +10,8 @@ library(hgu219hsentrezgcdf)
 library(splines)
 library(statmod)
 
-# Load probe ID
-id = read.delim('GSE164760_probe_id.txt', header = F)
-colnames(id) = c('Probe', 'ENTREZID', 'Symbol')
+# Load gene ID
+id = read.delim('hgu219_entrez_symbol.txt', header = T)
 
 # Get file path for RMA data
 dir_path = '/path/to/GSE164760/'
